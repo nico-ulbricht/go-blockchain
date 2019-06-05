@@ -48,7 +48,7 @@ func New(previousBlock Block, challengeSolution uint) Block {
 	return &block{
 		ChallengeSolution: challengeSolution,
 		Index:             previousBlock.GetIndex() + 1,
-		PreviousHash:      previousBlock.GetPreviousHash(),
+		PreviousHash:      previousBlock.GetHash(),
 		Timestamp:         time.Now(),
 	}
 }
