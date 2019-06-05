@@ -1,11 +1,19 @@
 package chain
 
-import "time"
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"strings"
+	"time"
+)
 
 // Block .
 type Block interface {
+	GetHash() string
 	GetIndex() uint
 	GetPreviousHash() string
+	IsSolutionValid() bool
 }
 
 type block struct {
@@ -21,6 +29,18 @@ func (b *block) GetIndex() uint {
 
 func (b *block) GetPreviousHash() string {
 	return b.PreviousHash
+}
+
+func (b *block) GetHash() string {
+	data := fmt.Sprintf("%s%d", b.PreviousHash, b.ChallengeSolution)
+	hash := sha256.New()
+	hash.Write([]byte(data))
+	return hex.EncodeToString(hash.Sum(nil))
+}
+
+func (b *block) IsSolutionValid() bool {
+	hash := b.GetHash()
+	return strings.HasSuffix(hash, "0")
 }
 
 // New .
