@@ -3,6 +3,7 @@ package chain
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -12,30 +13,31 @@ import (
 type Block interface {
 	GetHash() string
 	GetIndex() uint
-	GetPreviousHash() string
 	IsSolutionValid() bool
 }
 
 type block struct {
-	ChallengeSolution uint
-	Index             uint
-	PreviousHash      string
-	Timestamp         time.Time
+	ChallengeSolution uint      `json:"challengeSolution"`
+	Index             uint      `json:"index"`
+	PreviousHash      string    `json:"previousHash"`
+	Timestamp         time.Time `json:"timestamp"`
 }
 
 func (b *block) GetIndex() uint {
 	return b.Index
 }
 
-func (b *block) GetPreviousHash() string {
-	return b.PreviousHash
-}
-
 func (b *block) GetHash() string {
-	data := fmt.Sprintf("%s%d", b.PreviousHash, b.ChallengeSolution)
+	payload, err := json.Marshal(b)
+	if err != nil {
+		panic(fmt.Errorf("unable to hash block %d, %v", b.Index, err))
+	}
+
+	data := fmt.Sprintf("%s-%d", payload, b.ChallengeSolution)
 	hash := sha256.New()
 	hash.Write([]byte(data))
-	return hex.EncodeToString(hash.Sum(nil))
+	hexHash := hex.EncodeToString(hash.Sum(nil))
+	return hexHash
 }
 
 func (b *block) IsSolutionValid() bool {
